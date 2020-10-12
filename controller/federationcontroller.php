@@ -138,4 +138,35 @@ class FederationController extends OCSController {
         $this->logger->debug("Federated request lock for " . $fileId, ["app" => $this->appName]);
         return new DataResponse();
     }
+
+    /**
+     * Returns the origin document key for editor
+     *
+     * @param string $shareToken - access token
+     * @param string $path - file path
+     * @param bool $lock - status
+     * @param bool $fs - status
+     *
+     * @return DataResponse
+     * 
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function keyunlock($shareToken, $path, $lock, $fs) {
+        list ($file, $error, $share) = $this->fileUtility->getFileByToken(null, $shareToken, $path);
+
+        if (isset($error)) {
+            $this->logger->error("Federated getFileByToken: $error", ["app" => $this->appName]);
+            return new DataResponse(["error" => $error]);
+        }
+
+        $fileId = $file->getId();
+
+        KeyManager::lock($fileId, $lock);
+        KeyManager::setForcesave($fileId, $fs);
+
+        $this->logger->debug("Federated request lock for " . $fileId, ["app" => $this->appName]);
+        return new DataResponse();
+    }
 }

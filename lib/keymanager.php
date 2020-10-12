@@ -183,4 +183,41 @@ class KeyManager {
             $this->logger->error("Error lock federated key " . $data["error"], ["app" => $this->appName]);
         }
     }
+
+    /**
+     * Change lock status in the federated share
+     *
+     * @param File $file - file
+     * @param bool $lock - status
+     * @param bool $fs - status
+     * 
+     */
+    public static function unlockFederatedKey($file, $lock = false, $fs = true) {
+        $remote = $file->getStorage()->getRemote();
+        $shareToken = $file->getStorage()->getToken();
+        $internalPath = $file->getInternalPath();
+
+        $httpClientService = \OC::$server->getHTTPClientService();
+        $client = $httpClientService->newClient();
+        $response = $client->post($remote . "ocs/v2.php/apps/" . $this->appName . "/api/v1/keyunlock?format=json", [
+            "timeout" => 5,
+            "body" => [
+                "shareToken" => $shareToken,
+                "path" => $internalPath,
+                "lock" => $lock,
+                "fs" => $fs
+            ]
+        ]);
+        $body = \json_decode($response->getBody(), true);
+
+        $data = $body["ocs"]["data"];
+
+        if(empty($data)) {
+            $this->logger->debug("Federated request unlock for " . $fileId . " is successful", ["app" => $this->appName]);
+        }
+
+        if (!empty($data["error"])) {
+            $this->logger->error("Error unlock federated key " . $data["error"], ["app" => $this->appName]);
+        }
+    }
 }

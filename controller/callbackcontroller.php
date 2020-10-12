@@ -525,6 +525,11 @@ class CallbackController extends Controller {
                         return $file->putContent($newData);
                     });
 
+                    if ($isForcesave
+                        && $file->getStorage()->instanceOfStorage(SharingExternalStorage::class)) {
+                        KeyManager::unlockFederatedKey($fileId, false, $isForcesave);
+                    }
+
                     //unlock key for future federated save
                     KeyManager::lock($fileId, false);
                     KeyManager::setForcesave($fileId, $isForcesave);

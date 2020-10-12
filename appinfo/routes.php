@@ -39,6 +39,7 @@ return [
     ],
     "ocs" => [
         ["name" => "federation#key", "url" => "/api/v1/key", "verb" => "POST"],
-        ["name" => "federation#keylock", "url" => "/api/v1/keylock", "verb" => "POST"]
+        ["name" => "federation#keylock", "url" => "/api/v1/keylock", "verb" => "POST"],
+        ["name" => "federation#keyunlock", "url" => "/api/v1/keyunlock", "verb" => "POST"]
     ]
 ];
