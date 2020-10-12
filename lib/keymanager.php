@@ -19,6 +19,7 @@
 
 namespace OCA\Onlyoffice;
 
+use OCP\Files\File;
 
 /**
  * Key manager
@@ -146,5 +147,40 @@ class KeyManager {
         $fs = is_array($rows) && isset($rows["fs"]) ? $rows["fs"] : "";
 
         return $fs === "1";
+    }
+
+    /**
+     * Change lock status in the federated share
+     *
+     * @param File $file - file
+     * @param bool $lock - status
+     * 
+     */
+    public static function lockFederatedKey($file, $lock = true) {
+        $remote = $file->getStorage()->getRemote();
+        $shareToken = $file->getStorage()->getToken();
+        $internalPath = $file->getInternalPath();
+
+        $httpClientService = \OC::$server->getHTTPClientService();
+        $client = $httpClientService->newClient();
+        $response = $client->post($remote . "ocs/v2.php/apps/" . $this->appName . "/api/v1/keylock?format=json", [
+            "timeout" => 5,
+            "body" => [
+                "shareToken" => $shareToken,
+                "path" => $internalPath,
+                "lock" => $lock
+            ]
+        ]);
+        $body = \json_decode($response->getBody(), true);
+
+        $data = $body["ocs"]["data"];
+
+        if(empty($data)) {
+            $this->logger->debug("Federated request lock for " . $fileId . " is successful", ["app" => $this->appName]);
+        }
+
+        if (!empty($data["error"])) {
+            $this->logger->error("Error lock federated key " . $data["error"], ["app" => $this->appName]);
+        }
     }
 }

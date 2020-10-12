@@ -514,8 +514,7 @@ class CallbackController extends Controller {
 
                     if ($isForcesave
                         && $file->getStorage()->instanceOfStorage(SharingExternalStorage::class)) {
-                        $this->logger->info("Track: $fileId status $status not allowed for external file", ["app" => $this->appName]);
-                        break;
+                        KeyManager::lockFederatedKey($fileId, $isForcesave);
                     }
 
                     //lock the key when forcesave and unlock if last forcesave is broken
