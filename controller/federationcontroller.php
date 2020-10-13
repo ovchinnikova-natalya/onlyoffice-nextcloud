@@ -140,7 +140,7 @@ class FederationController extends OCSController {
     }
 
     /**
-     * Returns the origin document key for editor
+     * Unlock the origin document key for editor
      *
      * @param string $shareToken - access token
      * @param string $path - file path
